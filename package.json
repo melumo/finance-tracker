@@ -15,6 +15,7 @@
     "lint:fix": "prettier --write --list-different . && pnpm lint:js --fix"
   },
   "dependencies": {
+    "@nuxt/fonts": "^0.6.1",
     "@nuxt/ui": "^2.15.1",
     "nuxt": "^3.11.1",
     "vue": "^3.4.21",
