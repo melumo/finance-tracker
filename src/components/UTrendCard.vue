@@ -29,6 +29,8 @@ const trendingPercentage = computed(() => {
 
   return amount > lastAmount ? `+${Math.ceil(ratio)}%` : `-${Math.ceil(ratio)}%`
 })
+
+const { currency } = useCurrency(amount)
 </script>
 
 <template>
@@ -49,7 +51,7 @@ const trendingPercentage = computed(() => {
         </div>
       </template>
       <template v-else>
-        <div class="text-2xl font-bold mb-0.5">{{ amount }}</div>
+        <div class="text-2xl font-bold mb-0.5">{{ currency }}</div>
         <p class="text-sm tracking-tight text-slate-500 dark:text-slate-300">
           {{ trendingPercentage }} vs last period
         </p>
