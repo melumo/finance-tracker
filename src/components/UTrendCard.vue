@@ -1,11 +1,34 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   title: string
   amount: number
   lastAmount: number
   icon: string
   loading?: boolean
 }>()
+
+const { amount, lastAmount } = props
+
+const trendingPercentage = computed(() => {
+  const bigger = Math.max(amount, lastAmount)
+  const lower = Math.min(amount, lastAmount)
+
+  const ratio = ((bigger - lower) / lower) * 100
+
+  if (ratio === 0 || (amount === lastAmount && lastAmount === 0)) {
+    return 'No changes'
+  }
+
+  if (ratio === Infinity) {
+    return `+${bigger}%`
+  }
+
+  if (amount < 0) {
+    return `${Math.ceil(ratio)}%`
+  }
+
+  return amount > lastAmount ? `+${Math.ceil(ratio)}%` : `-${Math.ceil(ratio)}%`
+})
 </script>
 
 <template>
@@ -26,9 +49,9 @@ defineProps<{
         </div>
       </template>
       <template v-else>
-        <div class="text-2xl font-bold">{{ amount }}</div>
-        <p class="text-sm text-slate-500 dark:text-slate-300">
-          +30% from last period
+        <div class="text-2xl font-bold mb-0.5">{{ amount }}</div>
+        <p class="text-sm tracking-tight text-slate-500 dark:text-slate-300">
+          {{ trendingPercentage }} vs last period
         </p>
       </template>
     </div>
