@@ -2,7 +2,10 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   srcDir: 'src/',
-  modules: ['@nuxt/ui', '@nuxt/fonts'],
+  modules: ['@nuxt/ui', '@nuxt/fonts', '@nuxtjs/supabase'],
+  supabase: {
+    redirect: false,
+  },
   fonts: {
     provider: 'google',
     families: [
