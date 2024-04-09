@@ -1,26 +1,40 @@
 <script setup lang="ts">
 import type { Transaction } from '~/types'
 
-const { currency } = useCurrency(200)
+const client = useSupabaseClient()
+
+const transactions: Ref<Transaction[] | null> = ref([])
+
+const { data } = useAsyncData(
+  'transactions',
+  async (): Promise<Transaction[]> => {
+    const { data, error } = await client.from('transaction').select()
+
+    if (error) throw error
+
+    return data.map((transaction: Transaction) => {
+      const { currency } = useCurrency(transaction.amount)
+
+      return {
+        ...transaction,
+        id: transaction.id.toString().slice(0, 8),
+        amount: currency.value,
+        created_at: new Date(transaction.created_at).toLocaleDateString(),
+      }
+    })
+  }
+)
+
+transactions.value = data.value
 
 const columns = [
   { key: 'id', label: '#' },
-  { key: 'title', label: 'Title', sortable: true },
+  { key: 'description', label: 'Description', sortable: true },
   { key: 'amount', label: 'Amount', sortable: true },
   { key: 'category', label: 'Category' },
-  { key: 'date', label: 'Date' },
+  { key: 'created_at', label: 'Date' },
   { key: 'actions' },
 ]
-
-const transactions: Transaction[] = Array.from({ length: 15 }, (_, index) => ({
-  id: index + 1,
-  title: 'Transaction ' + (index + 1),
-  amount: currency.value,
-  category: ['Income', 'Expense', 'Investment', 'Savings'][
-    Math.floor(Math.random() * 4)
-  ],
-  date: new Date().toLocaleDateString(),
-}))
 
 const actions = [
   [
@@ -38,13 +52,13 @@ const actions = [
 
 const page = ref(1)
 const pageCount = ref(10)
-const pageTotal = computed(() => transactions.length)
+const pageTotal = computed(() => transactions.value?.length ?? 0)
 const pageFrom = computed(() => (page.value - 1) * pageCount.value + 1)
 const pageTo = computed(() =>
   Math.min(page.value * pageCount.value, pageTotal.value)
 )
 const rows = computed(() =>
-  transactions.slice(
+  transactions.value?.slice(
     (page.value - 1) * pageCount.value,
     page.value * pageCount.value
   )
@@ -112,7 +126,7 @@ const rows = computed(() =>
           <UPagination
             v-model="page"
             :page-count="pageCount"
-            :total="transactions.length"
+            :total="transactions?.length ?? 0"
             :max="5"
             show-last
             show-first
