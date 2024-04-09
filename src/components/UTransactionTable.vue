@@ -35,6 +35,20 @@ const actions = [
     },
   ],
 ]
+
+const page = ref(1)
+const pageCount = ref(10)
+const pageTotal = computed(() => transactions.length)
+const pageFrom = computed(() => (page.value - 1) * pageCount.value + 1)
+const pageTo = computed(() =>
+  Math.min(page.value * pageCount.value, pageTotal.value)
+)
+const rows = computed(() =>
+  transactions.slice(
+    (page.value - 1) * pageCount.value,
+    page.value * pageCount.value
+  )
+)
 </script>
 
 <template>
@@ -49,7 +63,7 @@ const actions = [
       <h2 class="text-lg font-semibold">Transactions</h2>
     </template>
     <UTable
-      :rows="transactions"
+      :rows="rows"
       :columns="columns"
       :checkbox="{
         color: 'indigo',
@@ -74,5 +88,37 @@ const actions = [
         </UDropdown>
       </template>
     </UTable>
+    <template #footer>
+      <div class="flex items-center justify-between">
+        <div class="inline-block">
+          <span class="text-sm leading-5">
+            Showing
+            <span class="font-medium">{{ pageFrom }}</span>
+            to
+            <span class="font-medium">{{ pageTo }}</span>
+            of
+            <span class="font-medium">{{ pageTotal }}</span>
+            results
+          </span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm leading-5">Rows per page:</span>
+          <USelect
+            v-model="pageCount"
+            :options="[3, 5, 10, 15]"
+            class="me-2 w-20"
+            size="sm"
+          />
+          <UPagination
+            v-model="page"
+            :page-count="pageCount"
+            :total="transactions.length"
+            :max="5"
+            show-last
+            show-first
+          />
+        </div>
+      </div>
+    </template>
   </UCard>
 </template>
