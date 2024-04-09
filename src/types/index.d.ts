@@ -1,7 +1,7 @@
 export interface Transaction {
   id: string | number
-  title: string
+  description: string
   amount: number | string
   category?: string
-  date: Date | string
+  created_at: Date | string
 }
