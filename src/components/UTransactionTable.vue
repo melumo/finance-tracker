@@ -1,31 +1,5 @@
 <script setup lang="ts">
-import type { Transaction } from '~/types'
-
-const client = useSupabaseClient()
-
-const transactions: Ref<Transaction[] | null> = ref([])
-
-const { data } = useAsyncData(
-  'transactions',
-  async (): Promise<Transaction[]> => {
-    const { data, error } = await client.from('transaction').select()
-
-    if (error) throw error
-
-    return data.map((transaction: Transaction) => {
-      const { currency } = useCurrency(transaction.amount)
-
-      return {
-        ...transaction,
-        id: transaction.id.toString().slice(0, 8),
-        amount: currency.value,
-        created_at: new Date(transaction.created_at).toLocaleDateString(),
-      }
-    })
-  }
-)
-
-transactions.value = data.value
+const { transactions } = useFetchTransactions()
 
 const columns = [
   { key: 'id', label: '#' },
