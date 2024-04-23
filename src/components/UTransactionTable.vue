@@ -1,6 +1,15 @@
 <script setup lang="ts">
 const { transactions } = useFetchTransactions()
 
+const formattedTransactions = computed(() => {
+  return transactions.value?.map((transaction) => ({
+    ...transaction,
+    secID: transaction.id.toString().slice(0, 8),
+    amount: useCurrency(transaction.amount).currency.value,
+    created_at: new Date(transaction.created_at).toLocaleDateString(),
+  }))
+})
+
 const columns = [
   { key: 'id', label: '#' },
   { key: 'description', label: 'Description', sortable: true },
@@ -32,7 +41,7 @@ const pageTo = computed(() =>
   Math.min(page.value * pageCount.value, pageTotal.value)
 )
 const rows = computed(() =>
-  transactions.value?.slice(
+  formattedTransactions.value?.slice(
     (page.value - 1) * pageCount.value,
     page.value * pageCount.value
   )
@@ -58,6 +67,9 @@ const rows = computed(() =>
       }"
       class="w-full"
     >
+      <template #id-data="{ row }">
+        {{ row.secID }}
+      </template>
       <template #category-data="{ row }">
         <UBadge :label="row.category" color="white" size="xs" />
       </template>
