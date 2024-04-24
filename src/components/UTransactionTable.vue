@@ -34,7 +34,7 @@ async function handleDeleteTransaction(id: string) {
       color: 'red',
     })
   } finally {
-    pending.value = true
+    pending.value = false
   }
 }
 
