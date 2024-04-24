@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import type { Transaction } from '~/types'
+
+const toast = useToast()
+const client = useSupabaseClient()
 const { transactions } = useFetchTransactions()
+
+const pending = ref(false)
 
 const formattedTransactions = computed(() => {
   return transactions.value?.map((transaction) => ({
@@ -10,6 +16,28 @@ const formattedTransactions = computed(() => {
   }))
 })
 
+async function handleDeleteTransaction(id: string) {
+  pending.value = true
+
+  try {
+    await client.from('transaction').delete().eq('id', id)
+
+    toast.add({
+      title: 'Transaction has been deleted',
+      icon: 'i-heroicons-check-circle-20-solid',
+      color: 'green',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'An error occurred while deleting the transaction',
+      icon: 'i-heroicons-x-circle-20-solid',
+      color: 'red',
+    })
+  } finally {
+    pending.value = true
+  }
+}
+
 const columns = [
   { key: 'id', label: '#' },
   { key: 'description', label: 'Description', sortable: true },
@@ -19,7 +47,7 @@ const columns = [
   { key: 'actions' },
 ]
 
-const actions = [
+const actions = (row: Transaction) => [
   [
     {
       label: 'Edit',
@@ -28,7 +56,7 @@ const actions = [
     {
       label: 'Delete',
       slot: 'delete',
-      click: () => console.log('Delete'),
+      click: () => handleDeleteTransaction(row.id as string),
     },
   ],
 ]
@@ -73,8 +101,8 @@ const rows = computed(() =>
       <template #category-data="{ row }">
         <UBadge :label="row.category" color="white" size="xs" />
       </template>
-      <template #actions-data>
-        <UDropdown :items="actions">
+      <template #actions-data="{ row }">
+        <UDropdown :items="actions(row)">
           <UButton
             color="gray"
             variant="ghost"
